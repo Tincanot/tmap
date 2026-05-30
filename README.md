@@ -1,6 +1,14 @@
 # tmap
 Przegląd i analiza funkcji biblioteki tmap 
 
+### WAŻNE!
+
+Plik csv z danymi użytymi do pokazu jest zbyt duży, by dodać go do repozytorium. 
+
+Można go pobrać kożystając z podanych informacji źródłowych:
+
+GBIF.org (29 May 2026) GBIF Occurrence Download https://doi.org/10.15468/dl.895fx9
+
 ## O dokumencie
 
 Niniejszy dokument przedstawia podstawowe i najważniejsze informacje o pakiecie tmap.
@@ -20,3 +28,4 @@ Dokument składa się z następujących części (wyróżnione sekcje różnią 
 5.  Mapy interaktywne
 
 6.  Przykład wykorzystania z danymi biologicznymi.
+
