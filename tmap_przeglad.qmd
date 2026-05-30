@@ -1,0 +1,739 @@
+---
+title: "tmap"
+author:
+  name: Natalia Charzewska
+format:
+  html:
+    toc: true
+    toc-depth: 3
+---
+
+# O dokumencie
+
+Niniejszy dokument przedstawia podstawowe i najważniejsze informacje o pakiecie tmap.
+
+Dokumentacja biblioteki została przygotowana zarówno z myślą o osobach rozpoczynających pracę z językiem R, jak i bardziej doświadczonych użytkownikach. Początkujący mogą korzystać ze szczegółowych opisów kolejnych funkcji oraz towarzyszących im przykładów i wizualizacji, które ułatwiają zrozumienie zmian wprowadzanych na mapie. Z kolei dla zaawansowanych użytkowników liczne ilustracje stanowią wygodny punkt odniesienia, umożliwiając szybkie odnalezienie poszukiwanych rozwiązań bez konieczności szczegółowego analizowania całej dokumentacji.
+
+Dokument składa się z następujących części (wyróżnione sekcje różnią się od nazw rodziałów i podrozdziałów):
+
+1.  Wstęp (Instalacja i konfiguracja środowiska).
+
+2.  Minimalny kod potrzebny do stworzenia mapy oraz jego analiza.
+
+3.  Rozszerzenie kodu minalnego o argumenty funkcji i ich analiza (z przykładowymi mapami na końcu).
+
+4.  Przedstawienie kodu nie ograniczającego się do minimalnej ilości funkcji (z przykładowymi mapami na końcu).
+
+5.  Mapy interaktywne
+
+6.  Przykład wykorzystania z danymi biologicznymi.
+
+# Biblioteka tmap - przegląd (cheatsheat)
+
+Jednym z narzędzi umożliwiających pracę z danymi przestrzennymi w języku R jest biblioteka tmap. Została ona stworzona z myślą o wizualizacji danych geograficznych i kartograficznych, pozwalając na tworzenie zarówno statycznych, jak i interaktywnych map. Dzięki intuicyjnej składni oraz integracji z popularnymi formatami danych przestrzennych, tmap znajduje zastosowanie między innymi w ekologii, biogeografii i ochronie środowiska. Umożliwia ona przejrzyste przedstawianie rozmieszczenia gatunków, wyników analiz przestrzennych czy zależności między czynnikami środowiskowymi a badanymi organizmami, stanowiąc ważne uzupełnienie statystycznych możliwości języka R.
+
+#### Instalacja pakietu
+
+```{r}
+#Instalacja pakietu tmap (wykonywane tylko jednokrotnie)
+#install.packages("tmap")
+```
+
+#### Załadowanie pakietu
+
+```{r}
+library(tmap)
+```
+
+## Mapy tematyczne
+
+Głównym przeznaczeniem biblioteki tmap jest tworzenie map tematycznych. Umożliwia ona wizualizację danych przestrzennych w formie map przedstawiających wybrane cechy, zjawiska lub zależności geograficzne, pełniąc funkcję analogiczną do tworzenia wykresów dla danych statystycznych.
+
+### Kod minimalny - Podstawy
+
+```{r}
+#Wskazanie warstwy danych przestrzennych do wizualizacji
+#(obiektu, który ma zostać zmapowany).
+tm_shape(World) +
+  #Określenie sposobu wyświetlania danych.
+  #Funkcja tm_polygons() przedstawia obiekty w postaci wielokątów.
+  tm_polygons()
+```
+
+#### tm_shape()
+
+`tm_shape()` - służy do wskazania obiektu przestrzennego, który ma zostać zwizualizowany. Innymi słowy, określa ona źródło danych przestrzennych wykorzystywane przez kolejne warstwy mapy. Funkcja ta stanowi pierwszy etap budowy mapy.
+
+Sama funkcja nie generuje jeszcze żadnego widoku mapy. Jej zadaniem jest jedynie wskazanie, co ma zostać przedstawione, natomiast sposób wizualizacji zależy od kolejnych funkcji, które definiują wygląd i formę prezentacji danych.
+
+#### Warstwy wizualizacji:
+
+Aby utworzyć mapę, konieczne jest określenie sposobu prezentacji danych, czyli tego, w jaki sposób mają one zostać zobrazowane. Służą do tego funkcje warstwowe, które dobiera się w zależności od typu danych przestrzennych. Każda z nich odpowiada za inny sposób wizualizacji.
+
+-   `tm_polygons()` - wykorzystywana do wizualizacji obiektów poligonowych (np. granice państw, regiony)
+
+-   `tm_lines()` - stosowana dla danych liniowych (np. drogi, rzeki)
+
+-   `tm_dots()` oraz `tm_symbols()` - używane dla danych punktowych (`tm_symbols()` pozwala na bardziej złożoną symbolikę)
+
+-   `tm_raster()` - przeznaczona do danych rastrowych (np. modele wysokości terenu, dane satelitarne)
+
+Przykładowe alternatywne wizualizacje zbioru danych World:
+
+```{r}
+#"World" jako zbiór linii 
+#(granice obiektów przestrzennych)
+tm_shape(World) +
+  tm_lines()
+
+#"World" jako zbiór punktów
+#(geometryczne środki obiektów)
+tm_shape(World) +
+  tm_dots()
+
+#"World" jako zbiór symboli
+tm_shape(World) +
+  tm_symbols()
+```
+
+### Rozszerzenie kodu minimalnego
+
+#### Przegląd dostępnych zbiorów danych :
+
+```{r}
+#Wyświetlenie listy zbiorów danych dostępnych w pakiecie tmap
+data(package = "tmap")$results[, c("Item", "Title")]
+```
+
+Przykłady wybranych zbiorów danych oraz odpowiednich warstw wizualizacji:
+
+```{r}
+#Rzeki świata
+tm_shape(World_rivers) +
+  tm_lines()
+```
+
+```{r}
+#Raster "land" - wielowarstwowy zbiór danych opisujący cechy środowiska w przestrzeni
+tm_shape(land) +
+  tm_raster()
+```
+
+###### Przedstawienie pojedynczych struktur obiektu land:
+
+```{r}
+#Wypis dostępnych warstw danych
+summary(land)
+```
+
+```{r}
+#Tworzenie wizualizacji poszczególnych warstw rastera
+
+#Pokrycie terenu
+tm_shape(land["cover"]) +
+  tm_raster()
+
+#Uproszczena klasyfikacja pokrycia terenu
+tm_shape(land["cover_cls"]) +
+  tm_raster()
+
+#Procent pokrycia drzewostanem
+tm_shape(land["trees"]) +
+  tm_raster()
+
+#Wysokość n.p.m.
+tm_shape(land["elevation"]) +
+  tm_raster()
+```
+
+##### Wbudowane dane zbioru World:
+
+Przykład dostępnych zmiennych (kolumn) w zbiorze danych World:
+
+```{r}
+names(World)
+```
+
+```{r}
+#Podstawa mapy definiuje obiekt przestrzenny, który będzie wizualizowany
+tm_shape(World) +
+  #Wizualizacja danych z wykorzystaniem zmiennej footprint
+  #Kolor mapy zależy od wartości footprint
+  #ecological footprint - ślad ekologiczny, czyli szacunkowe zużycie zasobów Ziemi przypadające na mieszkańca danego kraju
+  tm_polygons(fill = "footprint")
+```
+
+`fill = ...` - służy do określenia zmiennej, na podstawie której nadawane są kolory wypełnienia poligonów. Mogą to być zarówno zmienne ciągłe (liczbowe), jak i kategoryczne, w zależności od charakteru danych.
+
+Podobną wizualizację można uzyskać również za pomocą funkcji plot(), jednak ma ona charakter bardziej poglądowy i oferuje ograniczone możliwości stylizacji w porównaniu do tmap. Funkcja ta jest szczególnie użyteczna przy szybkiej inspekcji danych, jednak mniej przydatna w przypadku tworzenia map publikacyjnych.
+
+```{r}
+#Wizualizacja danych zmiennej area z wykorzystaniem argumentu fill
+tm_shape(World) +
+  tm_polygons(fill = "area")
+```
+
+```{r}
+#Wizualizacja danych zmiennej area z wykorzystaniem funkcji plot()
+plot(World["area"]) 
+```
+
+#### tm_shape() - analiza argumentów
+
+```{r}
+#Wypis argumentów funckji tm_shape()
+args(tm_shape)
+```
+
+Opis najważniejszych argumentów funckji tm_shape():
+
+`shp` - obiekt przestrzenny (np. klasy sf, sp, raster), który ma zostać zwizualizowany. Argument ten może przyjmować różne typy danych przestrzennych, w tym obiekty wektorowe i rastrowe. Nazwa pochodzi od formatu shapefile, który historycznie był jednym z podstawowych formatów danych w systemach GIS (.shp).
+
+```{r}
+tm_shape(shp = World) +
+  tm_polygons()
+```
+
+`bbox = c(xmin = ..., ymin = ..., xmax = ..., ymax = ...)` - (bounding box) określa ograniczenie przestrzenne mapy poprzez zdefiniowanie prostokątnego wycinka obszaru. Pozwala to na wyświetlenie jedynie wybranego fragmentu danych.
+
+```{r}
+#Europa (przybliżony zakres)
+tm_shape(
+  World,
+  bbox = c(xmin = -20, ymin = 35, xmax = 40, ymax = 70)
+) +
+  tm_polygons()
+```
+
+`crs = ...` - (Coordinate Reference System) definiuje układ współrzędnych lub projekcję mapy. Zmiana tego parametru wpływa na sposób odwzorowania powierzchni Ziemi na płaszczyźnie, co może zmieniać wizualny kształt obiektów.
+
+-   EPSG:4326 - domyślny układ geograficzny (WGS84)
+
+-   +proj=robin - projekcja Robinsona (często używana w mapach świata)
+
+-   +proj=laea - projekcja azymutalna równopowierzchniowa
+
+```{r}
+# Domyślny układ współrzędnych (WGS84)
+tm_shape(World, crs = "EPSG:4326") +
+  tm_polygons()
+
+# Projekcja Robinsona
+tm_shape(World, crs = "+proj=robin") +
+  tm_polygons()
+
+# Projekcja azymutalna równopowierzchniowa
+tm_shape(World, crs = "+proj=laea") +
+  tm_polygons()
+```
+
+`name = "nazwa warstwy"` - określa nazwę warstwy, która może być wyświetlana w legendzie lub w trybie interaktywnym mapy.
+
+`filter` - umożliwia filtrowanie danych przed ich wizualizacją, dzięki czemu na mapie pojawiają się tylko obiekty spełniające określony warunek.
+
+```{r}
+tm_shape(
+  World,
+  filter = World$continent == "Europe"
+) +
+  tm_polygons(fill = "area")
+```
+
+#### tm_polygons - analiza funkcji tm_polygons
+
+```{r}
+#Wypis argumentów funckji tm_polygons()
+args(tm_polygons)
+```
+
+Opis najważniejszych argumentów funckji tm_polygons():
+
+`fill = ...` - określa sposób wypełnienia poligonów, czyli kolor ich wnętrza. Argument ten może przyjmować zarówno wartości stałe (np. nazwy kolorów), jak i nazwy zmiennych znajdujących się w zbiorze danych, na podstawie których generowana jest mapa tematyczna.
+
+```{r}
+#Kolorowanie stałą barwą
+tm_shape(World) +
+  tm_polygons(fill = "darkolivegreen1")
+
+#Kolorowanie na podstawie zmiennej (mapa tematyczna)
+tm_shape(World) +
+  tm_polygons(fill = "area")
+```
+
+`fill.scale  = ...`- skala kolorów dla wypełnienia. Określa sposób odwzorowania wartości zmiennej na kolory.
+
+-   Definiowanie palety kolorów - `(tm_scale(values = ...))`
+
+Argument values określa zestaw kolorów użytych do budowy skali.
+
+```{r}
+tm_shape(World) +
+  tm_polygons(
+    fill = "area",
+    #Wybór predefiniowanej palety kolorów
+    fill.scale = tm_scale(values = "matplotlib.greens")
+  )
+
+tm_shape(World) +
+  tm_polygons(
+    fill = "area",
+    #Własna paleta kolorów
+    fill.scale = tm_scale(values = c("cyan", "orange"))
+  )
+```
+
+-   Podział danych na klasy - `(tm_scale_intervals())`
+
+    Funkcja `tm_scale_intervals()` pozwala na dyskretyzację danych ciągłych, czyli podział ich na przedziały.
+
+    Argumenty:
+
+    -   `n = liczba` - definiuje liczbę klas.
+
+    -   `style = ...` - określa sposób klasyfikacji
+
+        \`Dostępne metody klasyfikacji:
+
+        -   "quantile" - równa liczba obserwacji w każdej klasie
+
+        -   "equal" - równe przedziały wartości
+
+        -   "pretty" - „czytelne” (zaokrąglone) granice klas
+
+        -   "jenks" - natural breaks (minimalizacja wariancji wewnątrz klas)
+
+        -   "sd" - klasy na podstawie odchylenia standardowego
+
+        -   "fixed" - ręcznie zdefiniowane przedziały
+
+```{r}
+tm_shape(World) +
+  tm_polygons(
+    fill = "area",
+    fill.scale = tm_scale_intervals(
+      n = 5,
+      style = "quantile"
+    )
+  )
+
+tm_shape(World) +
+  tm_polygons(
+    fill = "area",
+    fill.scale = tm_scale_intervals(
+      n = 5,
+      style = "equal"
+    )
+  )
+
+tm_shape(World) +
+  tm_polygons(
+    fill = "area",
+    fill.scale = tm_scale_intervals(
+      n = 5,
+      style = "jenks"
+    )
+  )
+```
+
+`fill.legend = ...` - służy do konfiguracji legendy odpowiadającej zmiennej użytej w argumencie fill. Pozwala na zmianę jej tytułu, zakresu, formatu opisu oraz sposobu prezentacji wartości w legendzie mapy.
+
+Argumenty: - `title = ...` - ustawia tytuł legendy (opis wyświetlany na mapie) - `frame = ...` - określa, czy legenda ma mieć ramkę - `orientation = ...` - ustala orientację legendy - `reverse = ...` - odwraca kolejność wartości w legendzie
+
+```{r}
+#Wyłączenie ramki legendy + zmiana tytułu
+tm_shape(World) +
+  tm_polygons(
+    fill = "footprint",
+    fill.legend = tm_legend(
+      title = "Ślad ekologiczny",
+      frame = FALSE
+    )
+  )
+```
+
+`col = ...` - określa kolor obramowania (konturu) obiektów przestrzennych, w tym przypadku poligonów. Argument ten pozwala na zmianę barwy linii wyznaczających granice obiektów na mapie.
+
+```{r}
+#Ustawienie koloru obramowania poligonów
+tm_shape(World) +
+  tm_polygons(
+    col = "coral"
+  )
+```
+
+`lwd = liczba` - (line width) określa grubość linii obramowania obiektów przestrzennych. Wyższa wartość oznacza grubsze kontury granic.
+
+```{r}
+tm_shape(World) + 
+  tm_polygons(lwd = 5)
+```
+
+`lty = ...` - (line type) określa styl linii obramowania (np. ciągła, przerywana, kropkowana).
+
+```{r}
+#domyślny styl (linia ciągła)
+tm_shape(World) +
+  tm_polygons(lty = "solid")
+
+#linia przerywana
+tm_shape(World) +
+  tm_polygons(lty = "dashed")
+
+#linia kropkowana
+tm_shape(World) +
+  tm_polygons(lty = "dotted")
+```
+
+`fill_alpha = liczba` - określa stopień przezroczystości wypełnienia poligonów. (Wartość mieści się w zakresie od 0 do 1.)
+
+```{r}
+#domyślna przezroczystość (brak przezroczystości)
+tm_shape(World) +
+  tm_polygons(fill = "area", fill_alpha = 1)
+
+#półprzezroczyste wypełnienie
+tm_shape(World) +
+  tm_polygons(fill = "area", fill_alpha = 0.5)
+```
+
+`col_alpha = liczba` - określa stopień przezroczystości obramowania (konturu) obiektów przestrzennych. (Wartość mieści się w zakresie od 0 do 1.)
+
+```{r}
+#domyślna przezroczystość - brak
+tm_shape(World) +
+  tm_polygons(col_alpha = 1)
+
+#połowiczna przezroczystość
+tm_shape(World) +
+  tm_polygons(col_alpha = 0.5)
+```
+
+`plot.order` - określa kolejność rysowania obiektów na mapie. Ma znaczenie szczególnie w przypadku nakładających się warstw lub obiektów o różnych stylach (np. poligony z grubymi obramowaniami), ponieważ wpływa na to, które elementy są rysowane jako pierwsze, a które znajdują się na wierzchu.
+
+`popup.vars` - Co robi? Dla map interaktywnych (view mode) — definiuje zmienne, które mają być wyświetlane w oknie podręcznym (popup) w trybie interaktywnym `(view mode)`. Pozwala określić, jakie informacje o obiekcie pojawią się po jego kliknięciu na mapie.
+
+`hover.vars` - określa zmienne, które mają być wyświetlane w trybie interaktywnym po najechaniu kursorem na dany obiekt mapy. Umożliwia szybki podgląd wybranych informacji bez konieczności kliknięcia elementu, co ułatwia eksplorację danych przestrzennych.
+
+### Przykładowe mapy (z jedną warstwą)
+
+```{r}
+tm_shape(
+  World,
+  #Układ współrzędnych (domyślny dla danych geograficznych)
+  crs = "EPSG:4326",
+  #Ograniczenie zakresu mapy do obszaru Afryki
+  bbox = c(xmin = -20, ymin = -40, xmax = 55, ymax = 45),
+  #Filtrowanie danych - wybór tylko kontynentu Afryka
+  filter = World$continent == "Africa"
+) +
+  tm_polygons(
+    fill = "area",
+    fill.scale = tm_scale_intervals(
+      n = 6,
+      style = "equal",
+      values = c("lightyellow", "orange")
+    )
+  )
+
+```
+
+```{r}
+tm_shape(
+  World,
+  crs = "+proj=robin",
+  #Wybór wybranych państw na podstawie ich nazw.
+    #Filtrowanie działa poprzez dopasowanie dokładnych wartości w kolumnie name
+    #Błędy w nazwach (np. literówki) spowodują brak dopasowania obiektu.
+      #Lista dostępnych państw: unique(World$name)
+  filter = World$name %in% c(
+    "Antarctica",
+    "Australia",
+    "Brazil",
+    "Canada",
+    "China",
+    "Greenland",
+    "Russia",
+    "United States of America"
+  )
+) +
+  tm_polygons(
+    fill = "area",
+    fill.scale = tm_scale(
+      values = c("darkolivegreen1", "coral")
+    )
+  )
+```
+
+```{r}
+tm_shape(World, crs = "+proj=laea") + 
+  tm_polygons(
+    fill = "area",
+    fill.scale = tm_scale_intervals(
+      n = 8,
+      style = "jenks",
+      values = c("cyan", "orange")
+    )
+  )
+```
+
+### Kod z użyciem wielu warstw
+
+W niektórych przypadkach pojedyncza warstwa wizualizacji jest wystarczająca, jednak w analizach przestrzennych często konieczne jest łączenie kilku warstw w celu pełniejszego przedstawienia danych.
+
+Biblioteka tmap umożliwia łączenie wielu warstw wizualizacji, co pozwala na tworzenie bardziej złożonych map.
+
+Oprócz podstawowych typów reprezentacji danych dostępne są również warstwy pomocnicze i kartograficzne, m.in.:
+
+-   `tm_text()` - dodawanie etykiet tekstowych do obiektów przestrzennych
+
+-   `tm_bubbles()` - wizualizacja punktów z wykorzystaniem wielkości symboli
+
+-   `tm_borders()` - niezależne kontrolowanie obramowania obiektów
+
+-   `tm_grid()` - dodanie siatki współrzędnych
+
+-   `tm_compass()` oraz `tm_scalebar()` - elementy kartograficzne (strzałka północy i skala mapy)
+
+-   `tm_layout()` - dostosowywanie ogólnego wyglądu mapy (m.in. tła, legendy, tytułu, ramek, marginesów oraz rozmieszczenia elementów kartograficznych)
+
+W niektórych przykładach wykres z jedną warstwą wizualizacji jest wystarczający, ale w niektóych sytuacjach jest on niewystarczający. Jest na to rozwiązanie, w postaci skorzystania z możliwości tworzenia wielu warst wizualizacji.
+
+```{r}
+tm_shape(
+  World,
+  bbox = c(xmin = -20, ymin = 35, xmax = 40, ymax = 70)
+) +
+  tm_borders(col = "#3A0000", lwd = 0.5) + 
+  tm_bubbles(size = "footprint", alpha = "footprint", col = "orangered", scale = 2)
+```
+
+```{r}
+tm_shape(World) +
+  tm_polygons(
+    fill = "area",
+    fill.scale = tm_scale_intervals(
+      n = 8,
+      style = "jenks",
+      values = c("beige", "peru")
+    )
+  ) +
+  tm_grid() +
+  tm_compass(
+  type = "4star",
+  color.light = "beige",
+  color.dark = "#3A0000"
+  ) +
+  tm_scalebar(
+    color.light = "beige",
+    color.dark = "#3A0000")
+```
+
+### Kod z użyciem wielu zbiorów danych
+
+```{r}
+tm_shape(World) +
+    tm_polygons(
+    fill = "area",
+    fill_alpha = 0.25,
+    fill.scale = tm_scale_intervals(
+      n = 8,
+      style = "jenks",
+      values = c("yellow", "green3")
+    )
+  ) +
+  tm_layout(bg.color = "aliceblue") +
+
+tm_shape(World_rivers) +
+  tm_lines(col = "cornflowerblue")
+```
+
+## mapy interaktywne
+
+Biblioteka tmap oferuje dwa główne tryby pracy.
+
+Domyślny tryb `tmap_mode("plot")` służy do tworzenia statycznych map przeznaczonych do wyświetlania w dokumentach, raportach i publikacjach. Z kolei tryb `tmap_mode("view")` umożliwia generowanie map interaktywnych, pozwalających na przybliżanie, przesuwanie oraz wyświetlanie dodatkowych informacji o obiektach przestrzennych.
+
+```{r}
+#Przywrócenie trybu statycznego 
+#Jeżeli tryb nie został wcześniej zmieniony, polecenie nie wpłynie na wynik.
+tmap_mode("plot")
+```
+
+```{r}
+#Włączenie trybu interaktywnego 
+#Od tego momentu wszystkie nowo renderowane mapy będą tworzone 
+  #jako mapy interaktywne, dopóki tryb nie zostanie ponownie zmieniony. 
+tmap_mode("view")
+```
+
+### Minimalna mapa interaktywna
+
+```{r}
+
+tm_shape(World) +
+  tm_polygons()
+```
+
+# Wizualizacja danych przestrzennych z GBIF
+
+Dane wykorzystane w analizie pochodzą z bazy Global Biodiversity Information Facility (GBIF), która gromadzi informacje o występowaniu organizmów na całym świecie. Celem analizy jest przedstawienie przestrzennego rozkładu obserwacji oraz przygotowanie zarówno mapy statycznej, jak i interaktywnej.
+
+## Charakterystyka danych
+
+Analizowany zbiór danych zawiera informacje o występowaniu gatunku *Cirsium arvense (L.) Scop.* (ostrożeń polny). Uwzględniono obserwacje wykonane przez ludzi (Basis of Record: Human Observation), dla których potwierdzono obecność gatunku (Occurrence Status: Present). Zbiór obejmuje rekordy zgromadzone w latach 2000-2026.
+
+**Źródło danych:**
+
+GBIF.org (29 May 2026) GBIF Occurrence Download https://doi.org/10.15468/dl.895fx9
+
+#### Wczytanie danych:
+
+```{r}
+#biblioteka umożliwiająca odczyt danych tekstowych
+library(readr)
+
+#odczyt pliku TSV (wartości rozdzielone tabulatorami)
+dane <- read_tsv(
+  "0024264-260519110011954.csv"
+)
+```
+
+##### Wstępna eksploracja danych
+
+Sprawdzenie nazw kolumn, w celu zapoznania się ze strukturą zbioru danych i zidentyfikowanie zmiennych potrzebnych do dalszej analizy.
+
+```{r}
+names(dane)
+```
+
+## Mapa tematyczna
+
+#### Agregacja danych
+
+Zagregowanie danych według kodów krajów, w celu przedstawienia liczby obserwacji w poszczególnych państwach.
+
+```{r}
+library(dplyr)
+
+#obliczenie liczby rekordów dla każdego kraju
+liczba_obserwacji <- dane %>% count(countryCode)
+```
+
+##### Porównanie kodów państw
+
+Sprawdzenie formatów kodów państw, występujących w obu zbiorach danych, by można było połączyć dane tabelaryczne z warstwą przestrzenną (World).
+
+```{r}
+head(unique(dane$countryCode))
+head(unique(World$iso_a3))
+```
+
+Dane GBIF wykorzystują dwuliterowe kody państw zgodne ze standardem ISO 3166-1 alpha-2, natomiast warstwa granic państw zawiera trzyliterowe kody ISO 3166-1 alpha-3.
+
+Oznacza to, że zbiory danych nie są bezpośrednio kompatybilne i wymagają konwersji do wspólnego formatu.
+
+###### Konwersja
+
+Przekonwertowanie dwuliterowych kodów krajów na trzyliterowe kody zgodne ze standardem ISO 3166-1 alpha-3, by umożliwić połączenie danych.
+
+```{r}
+library(countrycode)
+
+liczba_obserwacji$iso_a3 <- countrycode(
+  liczba_obserwacji$countryCode,
+  origin = "iso2c",
+  destination = "iso3c"
+)
+```
+
+#### Połączenie danych przestrzennych i tabelarycznych
+
+Połączenie warstwy granic państw z tabelą zawierającą liczbę obserwacji.
+
+(Dzięki zastosowaniu argumentu `all.x = TRUE` zachowane zostają wszystkie państwa występujące w warstwie przestrzennej, nawet jeśli nie odnotowano dla nich żadnych obserwacji.)
+
+```{r}
+Świat_obserwacje <- merge(
+  World,
+  liczba_obserwacji,
+  by = "iso_a3",
+  all.x = TRUE
+)
+```
+
+### Wizualizacja liczby obserwacji według państw
+
+Mapa przedstawia przestrzenne zróżnicowanie liczby obserwacji gatunku *Cirsium arvense* w poszczególnych państwach.
+
+```{r}
+tmap_mode("plot")
+
+tm_shape(Świat_obserwacje) +
+  tm_polygons(
+    fill = "n",
+    fill.scale = tm_scale_intervals(
+      values = "brewer.greens",
+      style = "quantile"
+    )
+  )
+```
+
+## Mapa interaktywna
+
+#### Przygotowanie danych punktowych
+
+Do przygotowania mapy interaktywnej wykorzystano jedynie obserwacje posiadające komplet współrzędnych geograficznych. Dodatkowo ograniczono zbiór danych do rekordów z roku 2025, aby zmniejszyć obciążenie pamięci operacyjnej oraz poprawić płynność działania mapy.
+
+```{r}
+library(sf)
+
+# usunięcie rekordów bez współrzędnych # oraz ograniczenie zbioru do obserwacji z 2025 roku
+dane_2025 <- dane %>%
+  filter(
+    year == 2025,
+    !is.na(decimalLatitude),
+    !is.na(decimalLongitude)
+  )
+```
+
+```{r}
+# sprawdzenie liczby rekordów po filtracji
+nrow(dane_2025)
+```
+
+#### Przekształcenie danych
+
+Przekształcone danych do formatu obiektów przestrzennych typu sf.
+
+```{r}
+punkty <- st_as_sf(
+  dane_2025,
+  coords = c(
+    "decimalLongitude",
+    "decimalLatitude"
+  ),
+  crs = 4326,
+  remove = FALSE
+)
+```
+
+### Wizualizacja rozmieszczenia obserwacji
+
+Interaktywna mapa umożliwia szczegółową analizę rozmieszczenia obserwacji gatunku *Cirsium arvense*.
+
+```{r}
+tmap_mode("view")
+
+tm_basemap("CartoDB.Positron") +
+  tm_shape(punkty) +
+  tm_dots(
+    fill = "darkolivegreen",
+    popup.vars = c(
+      "państwo" = "countryCode",
+      "decimalLatitude" = "decimalLatitude",
+      "decimalLongitude" = "decimalLongitude",
+      "instytucja" = "institutionCode",
+      "Data" = "eventDate"
+    )
+  )
+```
